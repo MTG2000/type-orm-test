@@ -19,6 +19,14 @@ class UserRepository extends BaseRepository {
       .printSql()
       .getMany();
   }
+
+  async find(username): Promise<User> {
+    return (await this.repository
+      .createQueryBuilder("user")
+      .where("name=:name", { name: username })
+      .addSelect("user.password")
+      .getOne()) as User;
+  }
 }
 
 export default new UserRepository();

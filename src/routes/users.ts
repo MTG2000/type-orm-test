@@ -18,14 +18,20 @@ export default [
     route: "/:id",
     action: new UserController().one,
   },
-  {
-    method: "post",
-    route: "/",
-    action: new UserController().save,
-  },
+
   {
     method: "delete",
     route: "/:id",
     action: new UserController().remove,
+  },
+  {
+    method: "post",
+    route: "/login",
+    action: new UserController().login,
+  },
+  {
+    method: "post",
+    route: "/register",
+    action: new UserController().register,
   },
 ];

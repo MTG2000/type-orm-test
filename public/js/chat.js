@@ -1,6 +1,11 @@
-const socket = io();
 const username = sessionStorage.getItem("username");
 const reciever = sessionStorage.getItem("reciever");
+
+const socket = io({
+  query: {
+    token: username,
+  },
+});
 
 function scrollToBottom() {
   const messages = jQuery("#messages");
@@ -45,6 +50,8 @@ socket.on("updateUserList", function (users) {
   jQuery("#users").html(ol);
 });
 
+socket.on("msg", (data) => console.log(data));
+
 socket.on("newMessage", function (message) {
   const formattedTime = moment(message.createdAt).format("h:mm a");
 
@@ -63,11 +70,18 @@ jQuery("#message-form").on("submit", function (e) {
   e.preventDefault();
 
   const messageTextBox = jQuery("[name=message]");
+  const rawMsg = messageTextBox.val();
+
+  const msg = rawMsg.slice(rawMsg.indexOf(" ") + 1);
+  const reciever = rawMsg.slice(1, rawMsg.indexOf(" "));
+
+  console.log(msg, reciever);
 
   socket.emit(
-    "createMessage",
+    "send",
     {
-      text: messageTextBox.val(),
+      msg,
+      reciever,
     },
     function () {
       messageTextBox.val("");

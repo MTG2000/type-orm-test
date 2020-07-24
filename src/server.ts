@@ -7,7 +7,9 @@ const path = require("path");
 
 // create express app
 const app = express();
+
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: false }));
 
 const publicPath = path.join(__dirname, "../public");
 
