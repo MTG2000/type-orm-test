@@ -4,19 +4,23 @@
    "description": "Awesome project developed with TypeORM.",
    "devDependencies": {
       "@types/node": "^8.0.29",
+      "@types/socket.io": "^2.1.10",
+      "nodemon": "^2.0.4",
       "ts-node": "3.3.0",
-      "ts-node-dev": "^1.0.0-pre.52",
       "typescript": "3.3.3333"
    },
    "dependencies": {
-      "typeorm": "0.2.25",
-      "reflect-metadata": "^0.1.10",
-      "sqlite3": "^4.0.3",
+      "@types/cookie": "^0.4.0",
+      "body-parser": "^1.18.1",
+      "cookie": "^0.4.1",
       "express": "^4.15.4",
-      "body-parser": "^1.18.1"
+      "reflect-metadata": "^0.1.10",
+      "socket.io": "^2.3.0",
+      "sqlite3": "^4.0.3",
+      "typeorm": "0.2.25"
    },
    "scripts": {
       "start": "ts-node  src/index.ts",
-      "dev": "ts-node-dev src/index.ts"
+      "dev": "nodemon "
    }
 }
