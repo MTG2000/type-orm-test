@@ -10,6 +10,7 @@ export default class ApiError extends Error {
     this.title = title;
     this.message = message;
     this.errorObject = error;
+    Object.setPrototypeOf(this, ApiError.prototype);
   }
 
   static BadRequest(title?, msg?, error?) {

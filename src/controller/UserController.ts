@@ -9,7 +9,6 @@ export class UserController {
   }
 
   async one(request: Request, response: Response, next: NextFunction) {
-    throw Errors.BadRequest("Name is Too Short");
     return await UsersRepository.one(request.params.id);
   }
 
