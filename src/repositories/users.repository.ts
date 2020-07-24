@@ -16,6 +16,7 @@ class UserRepository extends BaseRepository {
       .orWhere("user.lastName like :name ", {
         name: "%" + name + "%",
       })
+      .printSql()
       .getMany();
   }
 }

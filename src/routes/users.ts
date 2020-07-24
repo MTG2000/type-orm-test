@@ -1,5 +1,5 @@
 import { UserController } from "../controller/UserController";
-import logMiddelware from "../middlerwares/log";
+import logMiddelware from "../middlewares/log";
 
 export default [
   {

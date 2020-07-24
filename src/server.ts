@@ -2,6 +2,7 @@ import * as express from "express";
 import * as bodyParser from "body-parser";
 import { Request, Response } from "express";
 import Routes from "./routes/index";
+import handleError from "./middlewares/handleError";
 
 // create express app
 const app = express();
@@ -17,10 +18,13 @@ Routes.forEach((route) => {
         const result = await route.action(req, res, next);
         if (result) res.send(result);
       } catch (error) {
-        res.send({ error: "An Error Happened" });
+        //let the middleware handle the error
+        next(error);
       }
     }
   );
 });
+
+app.use(handleError);
 
 export default app;
