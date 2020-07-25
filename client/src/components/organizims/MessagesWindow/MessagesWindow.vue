@@ -79,8 +79,7 @@ export default {
   render() {
     let msgs = [...this.messages].reverse();
     for (let i = 0; i < msgs.length - 1; i++) {
-      msgs[i].showAvatar =
-        msgs[i].chatPersonDto.id !== msgs[i + 1].chatPersonDto.id;
+      msgs[i].showAvatar = msgs[i].user.id !== msgs[i + 1].user.id;
     }
 
     return (
@@ -107,16 +106,12 @@ export default {
             <Message
               key={message.id}
               id={message.id}
-              date={message.creationDate}
-              side={message.chatPersonDto.id === this.userId ? 1 : 2}
-              avatar={
-                message.chatPersonDto.personalPhoto &&
-                `https://healthintouch.net${message.chatPersonDto.personalPhoto}`
-              }
-              personName={`${message.chatPersonDto.firstName} ${message.chatPersonDto.lastName}`}
-              data={message.data}
-              messageType={message.messageType}
-              files={message.files}
+              date={message.created_at}
+              side={message.user.id === this.userId ? 1 : 2}
+              personName={message.user.name}
+              data={message.content}
+              // messageType={message.messageType}
+              // files={message.files}
               showAvatar={message.showAvatar}
               loading={
                 message.loading &&

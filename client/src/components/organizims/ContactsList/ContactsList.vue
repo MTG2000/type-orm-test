@@ -4,6 +4,7 @@ import dateAndTime from "date-and-time";
 import Message from "../../atoms/Message/Message";
 import RoomCard from "../../molecules/RoomCard/RoomCard.vue";
 import Loading from "../../atoms/Loading";
+import { log } from "util";
 
 export default {
   name: "messages-window",
@@ -72,10 +73,10 @@ export default {
               key={contact.id}
               active={contact.id === this.selectedRoom}
               title={contact.title}
-              latestMessage={contact.lastMessage}
-              numOfNewMessages={0}
+              latestMessage={contact.latestMessage.content}
+              numOfNewMessages={contact.newMessages}
               image={contact.photoUrl}
-              date={contact.lastMessageDateTime}
+              date={contact.latestMessage.created_at}
               on-click={() => this.openContact(contact.id)}
             ></RoomCard>
           ))}

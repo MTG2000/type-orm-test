@@ -5,10 +5,32 @@ import Errors from "../helpers/error";
 import AuthService from "../services/auth.service";
 import * as argon from "argon2";
 import { User } from "../entity/User";
+import { Contact } from "../entity/Contact";
 
 export class ContactsController {
   async all(request: Request, response: Response, next: NextFunction) {
-    return await ContactsRepository.allContacts(request.user.id);
+    let contacts = await ContactsRepository.allContacts(request.user.id);
+    contacts = await Promise.all(
+      contacts.map(async (contact: Contact) => {
+        const latestMessage = await ContactsRepository.getLatestMessage(
+          contact.id
+        );
+
+        const roomTitle = contact.group
+          ? contact.group.name
+          : contact.user1.id === request.user.id
+          ? contact.user2.name
+          : contact.user1.name;
+        return {
+          ...contact,
+          title: roomTitle,
+
+          latestMessage,
+        };
+      })
+    );
+
+    return contacts;
   }
 
   async one(request: Request, response: Response, next: NextFunction) {

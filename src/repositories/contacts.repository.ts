@@ -1,6 +1,7 @@
 import { getRepository, Like } from "typeorm";
 import BaseRepository from "./repository";
 import { Contact } from "../entity/Contact";
+import { Message } from "../entity/Message";
 
 class ContactsRepositroy extends BaseRepository {
   constructor() {
@@ -17,6 +18,24 @@ class ContactsRepositroy extends BaseRepository {
       .orWhere("contact.user2 = :userId", { userId })
 
       .getMany();
+  }
+
+  async getUserGroups(userId) {
+    return await this.repository
+      .createQueryBuilder("contact")
+      .where("contact.group is not null")
+      .andWhere("contact.user1 = :userId", { userId })
+      .getMany();
+  }
+
+  async getLatestMessage(contactId) {
+    return (
+      (await getRepository(Message)
+        .createQueryBuilder("message")
+        .where("message.contact = :contactId", { contactId })
+        .orderBy("message.created_at", "DESC")
+        .getOne()) || ""
+    );
   }
 
   async contactExist(userId1, userId2) {

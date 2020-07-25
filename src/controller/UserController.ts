@@ -53,6 +53,9 @@ export class UserController {
     response.cookie("authToken", token, {
       secure: false, // set to true if your using https
     });
-    return new Responses.Success("Logged In Successfully");
+    return {
+      id: user.id,
+      name: user.name,
+    };
   }
 }

@@ -12,7 +12,7 @@ export default {
     //
   }),
   computed: {
-    ...mapState("globalState", ["userId", "firstName", "lastName", "photoUrl"]),
+    ...mapState("globalState", ["userId", "name"]),
     ...mapState("mainTab", ["selectedRoom"]),
     ...mapGetters({
       messages: "mainTab/messages",
@@ -42,9 +42,7 @@ export default {
         data: msg,
         person: {
           id: this.userId,
-          firstName: this.firstName,
-          lastName: this.lastName,
-          personalPhoto: this.photoUrl,
+          name: this.name,
         },
       });
     },

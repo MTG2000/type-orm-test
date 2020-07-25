@@ -17,6 +17,10 @@ const publicPath = path.join(__dirname, "../public");
 
 app.use(express.static(publicPath));
 
+app.get("/login", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../public", "login.html"));
+});
+
 // register express routes from defined application routes
 Routes.forEach((route) => {
   (app as any)[route.method](

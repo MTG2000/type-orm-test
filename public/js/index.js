@@ -7,13 +7,21 @@ submitForm.addEventListener("submit", async (e) => {
   const password = submitForm.querySelector("#password-input").value;
   sessionStorage.setItem("username", username);
 
-  await fetch({
+  const result = await fetch("/api/users/login", {
     method: "POST",
-    url: "/api/users/login",
-    body: {
+    headers: {
+      "Content-Type": "application/json",
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify({
       username,
       password,
-    },
+    }),
   });
-  window.location = "/chat.html";
+
+  const data = await result.json();
+
+  localStorage.setItem("user", JSON.stringify(data));
+
+  window.location = "/";
 });

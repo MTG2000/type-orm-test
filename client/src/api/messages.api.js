@@ -6,13 +6,13 @@ export default {
     messageTypes,
     query,
     pageSize = 20,
-    pageNumber = 0
+    pageNumber = 1
   ) {
     return (
-      await Axios.get(`/ChatWebAPI/api/messages/${roomId}`, {
+      await Axios.get(`/api/messages/`, {
         params: {
-          ...(messageTypes && { messageTypes }),
-          ...(query && { query }),
+          id: roomId,
+
           pageSize,
           pageNumber,
         },

@@ -3,16 +3,7 @@ import Enums from "../helpers/enums";
 
 export default {
   async getRooms({ chatform = 1, personId = null, query = null }) {
-    return (
-      await Axios.get(`/ChatWebAPI/api/rooms`, {
-        params: {
-          enablePagination: false,
-          ...(chatform && { chatform }),
-          ...(personId && { personId }),
-          ...(query && { query }),
-        },
-      })
-    ).data;
+    return (await Axios.get(`/api/contacts`, {})).data;
   },
 
   async addRoom({

@@ -6,6 +6,18 @@ export default {
     return `${str.substr(0, length)}${withDot ? "..." : ""}`;
   },
 
+  toCamelCase(key, value) {
+    if (value && typeof value === "object") {
+      for (var k in value) {
+        if (/^[A-Z]/.test(k) && Object.hasOwnProperty.call(value, k)) {
+          value[k.charAt(0).toLowerCase() + k.substring(1)] = value[k];
+          delete value[k];
+        }
+      }
+    }
+    return value;
+  },
+
   isValidGUID(guid) {
     var pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return pattern.test(guid);
@@ -21,5 +33,11 @@ export default {
 
     var h = hash % 360;
     return "hsl(" + h + ", " + s + "%, " + l + "%)";
+  },
+
+  bringToTop(arr, key, value) {
+    return arr.sort(function(x, y) {
+      return x[key] == value ? -1 : y[key] == value ? 1 : 0;
+    });
   },
 };

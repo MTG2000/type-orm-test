@@ -1,32 +1,45 @@
 import * as socketio from "socket.io";
 import server from "../server";
 import * as cookie from "cookie";
+import * as jwt from "jsonwebtoken";
+import contactsRepository from "../repositories/contacts.repository";
+import messagesRepository from "../repositories/messages.repository";
 const io = socketio(server);
 
 // middleware
 io.use((socket, next) => {
-  //this:
-  let token = socket.handshake.query.token;
-
   //or this:
   const cookieRaw = socket.handshake.headers.cookie;
-  const { accessToken } = cookie.parse(cookieRaw);
+  const { authToken } = cookie.parse(cookieRaw);
+  if (!authToken) return next(new Error("authentication error"));
+  const { id, user: name } = jwt.decode(authToken);
+
   // Validate Access Token to get User From it
 
-  if (token) {
-    socket["user"] = token;
+  if (id) {
+    socket["user"] = { id, name };
     return next();
   }
   return next(new Error("authentication error"));
 });
 
-io.on("connection", (socket) => {
-  const user = socket["user"];
+io.on("connection", async (socket) => {
+  const { id, name } = socket["user"];
 
-  //let the user join a room uniqe to him
-  socket.join(user);
+  socket.on("send", async ({ room, data }, cb) => {
+    const msg = await messagesRepository.save({
+      content: data,
+      contact: room,
+      user: id,
+    });
 
-  socket.on("send", ({ msg, reciever }) => {
-    socket.to(reciever).emit("msg", { user, msg });
+    socket.to(room).emit("receive-message", msg);
+    cb();
+    // socket.to(reciever).emit("msg", { id, msg });
+  });
+
+  const contacts = await contactsRepository.allContacts(id);
+  contacts.forEach((contact: any) => {
+    socket.join(contact.id);
   });
 });

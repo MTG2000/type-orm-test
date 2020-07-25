@@ -1,11 +1,14 @@
 import Api from "../api";
 import Enums from "../helpers/enums";
+import HelperFuncs from "../helpers/functions";
+const socket = window.io();
 
 const MSGS_PAGE_SIZE = 10;
 
 export default {
   namespaced: true,
   state: {
+    socket,
     loadingRooms: true,
     loadingMessages: false,
 
@@ -52,23 +55,48 @@ export default {
     },
 
     setMessages(state, payload) {
+      state.rooms = state.rooms.map((room) => {
+        if (room.id === payload.id)
+          return {
+            ...room,
+            initialFetch: true,
+          };
+        return room;
+      });
       state.allMessages = {
         ...state.allMessages,
         [payload.id]: payload.data,
       };
     },
 
-    addMessages(state, payload) {
-      state.allMessages[state.selectedRoom] = [
-        ...payload,
-        ...state.allMessages[state.selectedRoom],
+    addMessages(state, { roomId, messages }) {
+      state.allMessages[roomId] = [
+        ...messages,
+        ...(state.allMessages[roomId] || []),
       ];
-      state.messages = state.allMessages[state.selectedRoom];
+
+      //update lastMessage Field
       for (let i = 0; i < state.rooms.length; i++) {
-        if (state.rooms[i].id === state.selectedRoom) {
-          state.rooms[i].lastMessage = payload[payload.length - 1].data;
+        if (state.rooms[i].id === roomId) {
+          state.rooms[i].latestMessage = messages[messages.length - 1];
           break;
         }
+      }
+
+      // ReOrder Rooms so that the recently updated room comes first
+      state.rooms = HelperFuncs.bringToTop(state.rooms, "id", roomId);
+
+      //the message came to an unopened room
+      if (state.selectedRoom !== roomId) {
+        state.rooms = state.rooms.map((room) => {
+          if (room.id === roomId) {
+            return {
+              ...room,
+              newMessages: (room.newMessages || 0) + 1,
+            };
+          }
+          return room;
+        });
       }
     },
 
@@ -92,10 +120,33 @@ export default {
 
     setSelectedRoom(state, payload) {
       state.selectedRoom = payload;
+      state.rooms = state.rooms.map((room) => {
+        if (room.id === state.selectedRoom) {
+          return {
+            ...room,
+            newMessages: null,
+          };
+        }
+        return room;
+      });
     },
     setLoadingMessages(state, payload) {
       state.loadingMessages = payload;
     },
+
+    setLoadingMessagesForRoom(state, { roomId, status }) {
+      state.rooms = state.rooms.map((room) => {
+        if (room.id === roomId) {
+          return {
+            ...room,
+            loadingMessages: status,
+          };
+        }
+
+        return room;
+      });
+    },
+
     setLoadingRooms(state, payload) {
       state.loadingRooms = payload;
     },
@@ -132,8 +183,10 @@ export default {
       try {
         commit("setLoadingRooms", true);
         const result = await Api.Rooms.getRooms({});
+
         commit("setRooms", result);
         commit("setLoadingRooms", false);
+        return result;
       } catch (error) {
         return null;
       }
@@ -187,8 +240,12 @@ export default {
     async fetchMessages({ commit, state }, payload) {
       commit("setSelectedRoom", payload);
 
+      const initialFetched =
+        state.rooms.filter((room) => room.id === payload && room.initialFetch)
+          .length > 0;
+
       //if a certain room messages are already fetched
-      if (state.allMessages[payload]) {
+      if (initialFetched) {
         commit("setLoadingMessages", true);
 
         commit("setMessages", {
@@ -221,33 +278,53 @@ export default {
       }
     },
 
+    async receiveMessage({ commit }, { userId, message }) {
+      try {
+        const isMyMessage = userId === message.user.id;
+        const roomId = message.contact.id;
+
+        if (isMyMessage) return;
+
+        commit("addMessages", {
+          roomId,
+          messages: [message],
+        });
+      } catch (error) {
+        return null;
+      }
+    },
+
     async fetchMoreMessages({ commit, state }, payload) {
       if (
         !state.allMessages[payload] ||
-        state.allMessages[payload].length % MSGS_PAGE_SIZE !== 0
+        state.allMessages[payload].length % MSGS_PAGE_SIZE !== 0 ||
+        state.rooms.filter(
+          (room) => room.id === payload && room.loadingMessages
+        ).length > 0
       )
         return;
 
       commit("setSelectedRoom", payload);
 
+      // This is for preventing another request for the same page
+      commit("setLoadingMessagesForRoom", { roomId: payload, status: true });
+
       const oldMsgs = state.allMessages[payload] || [];
 
-      commit("setLoadingNewContact", false);
-
-      //Disable the new contact dialog loading
       try {
         const result = await Api.Messages.getMessages(
           payload,
           null,
           null,
           MSGS_PAGE_SIZE,
-          Math.floor(oldMsgs.length / MSGS_PAGE_SIZE)
+          Math.ceil(oldMsgs.length / MSGS_PAGE_SIZE) + 1
         );
         commit("setMessages", {
           id: payload,
           data: [...state.allMessages[payload], ...result],
         });
 
+        commit("setLoadingMessagesForRoom", { roomId: payload, status: false });
         commit("setLoadingMessages", false);
       } catch (error) {
         commit("setLoadingMessages", false);
@@ -303,10 +380,10 @@ export default {
           // Just Data
           newMessages.push({
             id: Date.now().toString(), //it will be unique localy
-            data,
+            content: data,
             files: [],
-            creationDate: new Date().toISOString(),
-            chatPersonDto: person,
+            created_at: new Date().toISOString(),
+            user: person,
             loading: true,
             messageType: Enums.MessagesTypes.Text,
           });
@@ -323,7 +400,10 @@ export default {
           });
         }
 
-        commit("addMessages", newMessages);
+        commit("addMessages", {
+          roomId: state.selectedRoom,
+          messages: newMessages,
+        });
 
         const currentRoom = state.selectedRoom;
 
@@ -361,7 +441,7 @@ export default {
         for (const msg of newMessages) {
           if (msg.files.length === 0) {
             commit("setMessageToSend", {
-              selectedRoom: state.selectedRoom,
+              roomId: state.selectedRoom,
               msg,
             });
             dispatch("sendMessage");
@@ -378,15 +458,23 @@ export default {
 
       let i = 0;
       while (i < state.msgsToSend.length) {
-        const { selectedRoom, msg } = state.msgsToSend[i];
-        await Api.Messages.addMessage(
-          selectedRoom,
-          msg.data,
-          msg.messageType,
-          msg.files
-        );
+        const d = state.msgsToSend[i];
+        const { roomId, msg } = d;
+        await new Promise((res, rej) => {
+          socket.emit(
+            "send",
+            {
+              room: roomId,
+              data: msg.content,
+            },
+            () => {
+              res();
+            }
+          );
+        });
+
         commit("sentMessage", {
-          room: selectedRoom,
+          room: roomId,
           id: msg.id,
         });
         i++;

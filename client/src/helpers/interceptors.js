@@ -10,12 +10,12 @@ const accessToken =
 
 Axios.interceptors.request.use(
   (config) => {
-    const token = accessToken;
-    config.baseURL = PROXY_URL + Vue.prototype.$api;
+    // const token = accessToken;
+    // config.baseURL = PROXY_URL + Vue.prototype.$api;
 
-    if (token) {
-      config.headers["Authorization"] = "bearer " + token;
-    }
+    // if (token) {
+    //   config.headers["Authorization"] = "bearer " + token;
+    // }
     // config.headers['Content-Type'] = 'application/json';
     return config;
   },
