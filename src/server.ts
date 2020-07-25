@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
+import * as cookieParser from "cookie-parser";
 import { Request, Response, NextFunction } from "express";
 import Routes from "./routes/index";
 import handleError from "./middlewares/handleError";
@@ -10,6 +11,7 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 const publicPath = path.join(__dirname, "../public");
 

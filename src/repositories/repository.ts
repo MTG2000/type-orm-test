@@ -11,7 +11,7 @@ export default class BaseRepository {
     return getRepository(this.entity);
   }
 
-  async all() {
+  async all(): Promise<any[]> {
     return await this.repository.find();
   }
 

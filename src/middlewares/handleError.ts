@@ -3,6 +3,8 @@ import { NextFunction, Request, Response } from "express";
 
 // Here we can handle all errors
 export default (err, req: Request, res: Response, next: NextFunction) => {
+  console.log(err);
+
   if (err instanceof ApiError) {
     return res
       .status(err.statusCode)
