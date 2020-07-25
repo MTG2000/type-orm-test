@@ -7,6 +7,15 @@ import * as argon from "argon2";
 import { User } from "../entity/User";
 import { Contact } from "../entity/Contact";
 
+// Helpers
+function getContactTitle(contact, userId) {
+  return contact.group
+    ? contact.group.name
+    : contact.user1.id === userId
+    ? contact.user2.name
+    : contact.user1.name;
+}
+
 export class ContactsController {
   async all(request: Request, response: Response, next: NextFunction) {
     let contacts = await ContactsRepository.allContacts(request.user.id);
@@ -15,12 +24,7 @@ export class ContactsController {
         const latestMessage = await ContactsRepository.getLatestMessage(
           contact.id
         );
-
-        const roomTitle = contact.group
-          ? contact.group.name
-          : contact.user1.id === request.user.id
-          ? contact.user2.name
-          : contact.user1.name;
+        const roomTitle = getContactTitle(contact, request.user.id);
         return {
           ...contact,
           title: roomTitle,
@@ -34,12 +38,26 @@ export class ContactsController {
   }
 
   async one(request: Request, response: Response, next: NextFunction) {
-    return await ContactsRepository.one(request.params.id);
+    let contact: any = await ContactsRepository.getContact(request.query.id);
+
+    contact.title = getContactTitle(contact, request.user.id);
+    return contact;
   }
 
   async remove(request: Request, response: Response, next: NextFunction) {
     await ContactsRepository.remove(request.params.id);
     return new Responses.Success("Contact Deleted Successfully");
+  }
+
+  async roomExist(request: Request, response: Response, next: NextFunction) {
+    const user = request.user;
+    const userId = request.query.userId;
+
+    const contactExist = await ContactsRepository.contactExist(user.id, userId);
+
+    return {
+      contactExist,
+    };
   }
 
   async createContact(

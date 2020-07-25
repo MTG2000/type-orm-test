@@ -8,7 +8,18 @@ export default [
     middlewares: [authMiddleware()],
     action: new ContactsController().all,
   },
-
+  {
+    method: "get",
+    route: "/room",
+    middlewares: [authMiddleware()],
+    action: new ContactsController().one,
+  },
+  {
+    method: "get",
+    route: "/exist",
+    middlewares: [authMiddleware()],
+    action: new ContactsController().roomExist,
+  },
   {
     method: "delete",
     route: "/:id",

@@ -36,10 +36,10 @@ export default {
         const CancelToken = Axios.CancelToken;
         const source = CancelToken.source();
         this.CancelToken = source;
-        const res = await Axios.get("/ChatWebAPI/api/accounts", {
+        const res = await Axios.get("/api/users/search", {
           cancelToken: source.token,
           params: {
-            query: this.search
+            name: this.search
           }
         });
         this.contacts = res.data;
@@ -70,8 +70,7 @@ export default {
             <RoomCard
               id={contact.id}
               key={contact.id}
-              title={`${contact.firstName} ${contact.lastName}`}
-              image={contact.personalPhoto}
+              title={contact.name}
               hideOnSmall={false}
               clipTitle={false}
               defaultColor="#FFF"
@@ -82,7 +81,7 @@ export default {
               on-click={() =>
                 this.$emit("click", {
                   id: contact.id,
-                  name: `${contact.firstName} ${contact.lastName}`
+                  name: contact.name
                 })
               }
             ></RoomCard>

@@ -1,8 +1,8 @@
 import Api from "../api";
 import Enums from "../helpers/enums";
 import HelperFuncs from "../helpers/functions";
-const socket = window.io();
 
+const socket = window.io();
 const MSGS_PAGE_SIZE = 10;
 
 export default {
@@ -197,12 +197,11 @@ export default {
         commit("setLoadingNewContact", true);
 
         // Check If Room exists
-        const result = await Api.Rooms.getRooms({
-          personId: payload,
-        });
+
+        const result = await Api.Rooms.roomExist(payload);
         let roomId;
 
-        if (result.length === 0) {
+        if (!result.contactExist) {
           //Create a room
           const newRoom = await Api.Rooms.addRoom({ roomMembers: [payload] });
 
@@ -319,6 +318,7 @@ export default {
           MSGS_PAGE_SIZE,
           Math.ceil(oldMsgs.length / MSGS_PAGE_SIZE) + 1
         );
+
         commit("setMessages", {
           id: payload,
           data: [...state.allMessages[payload], ...result],

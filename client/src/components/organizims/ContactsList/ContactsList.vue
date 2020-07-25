@@ -73,10 +73,12 @@ export default {
               key={contact.id}
               active={contact.id === this.selectedRoom}
               title={contact.title}
-              latestMessage={contact.latestMessage.content}
+              latestMessage={
+                contact.latestMessage && contact.latestMessage.content
+              }
               numOfNewMessages={contact.newMessages}
               image={contact.photoUrl}
-              date={contact.latestMessage.created_at}
+              date={contact.latestMessage && contact.latestMessage.created_at}
               on-click={() => this.openContact(contact.id)}
             ></RoomCard>
           ))}

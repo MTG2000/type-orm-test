@@ -20,6 +20,13 @@ class ContactsRepositroy extends BaseRepository {
       .getMany();
   }
 
+  async getContact(id) {
+    return await this.repository.findOne({
+      where: { id },
+      relations: ["user1", "user2", "group"],
+    });
+  }
+
   async getUserGroups(userId) {
     return await this.repository
       .createQueryBuilder("contact")

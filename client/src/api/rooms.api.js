@@ -6,34 +6,36 @@ export default {
     return (await Axios.get(`/api/contacts`, {})).data;
   },
 
-  async addRoom({
-    title = null,
-    roomType = Enums.RoomsTypes.Private,
-    chatTypeId = Enums.EmptyGuid,
-    chatForm = 1,
-    roomMembers = [],
-  }) {
-    const res = await Axios.post("/ChatWebAPI/api/rooms/room", {
-      title,
-      roomType,
-      chatTypeId,
-      chatForm,
-      roomMembers,
-    });
-
-    // Fetch The room
-
+  async roomExist(userId) {
     return (
-      await Axios.get("/ChatWebAPI/api/rooms/room", {
+      await Axios.get(`/api/contacts/exist`, {
         params: {
-          id: res.data.entity.id,
+          userId,
         },
       })
     ).data;
   },
 
+  async addRoom({ title = null, roomMembers = [] }) {
+    const res = await Axios.post("/api/contacts/create", {
+      userId: roomMembers[0],
+    });
+
+    // Fetch The room
+    const room = (
+      await Axios.get("/api/contacts/room", {
+        params: {
+          id: res.data.id,
+        },
+      })
+    ).data;
+    console.log(room);
+
+    return room;
+  },
+
   async deleteRoom(itemId) {
-    return await Axios.delete("/ChatWebAPI/api/rooms/room", {
+    return await Axios.delete("/api/contacts/room", {
       data: {
         itemId,
       },

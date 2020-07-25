@@ -34,7 +34,7 @@ export class UserController {
     return new Responses.Success("User Deleted Successfully");
   }
   async findByName(request: Request, response: Response, next: NextFunction) {
-    return await UsersRepository.getByName(request.query.name);
+    return await UsersRepository.findByName(request.query.name);
   }
 
   async login(request: Request, response: Response, next: NextFunction) {

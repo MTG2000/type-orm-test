@@ -66,12 +66,13 @@ export default {
       // watch it
       //Use nextTick to run the code AFTER Mounting the dom
       Vue.nextTick(() => {
-        if (oldVal.length !== newVal.length)
+        if (oldVal.length !== newVal.length) {
           if (newVal[0] && oldVal[0] && newVal[0].id === oldVal[0].id)
             //if I fetched older msgs DONT scroll to bottom
             return;
 
-        this.scrollTop();
+          this.scrollTop();
+        }
       });
     }
   },
