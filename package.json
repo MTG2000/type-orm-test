@@ -7,7 +7,7 @@
       "@types/socket.io": "^2.1.10",
       "@types/argon2": "^0.15.0",
       "@types/cookie": "^0.4.0",
-      "nodemon": "^2.0.4",
+      "nodemon": "^2.0.20",
       "ts-node": "3.3.0",
       "typescript": "3.3.3333"
    },
